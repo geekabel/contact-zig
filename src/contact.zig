@@ -29,7 +29,8 @@ pub fn listContacts(db: database.Database) anyerror!void {
 
 pub fn deleteContact(db: database.Database) anyerror!void {
     std.debug.print("Enter the name of the contact to delete: ", .{});
-    var name = try std.debug.readLineAlloc(std.heap.page_allocator);
+    const name = try std.debug.readLineAlloc(std.heap.page_allocator);
+    defer std.heap.page_allocator.free(name);
 
     try db.deleteContact(name);
     std.debug.print("Contact deleted successfully.\n", .{});

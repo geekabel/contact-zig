@@ -15,12 +15,12 @@ pub fn openDatabase(path: []const u8) anyerror!Database {
     return Database{ .connection = db };
 }
 
-pub fn (db: *Database) insertContact(contact: Contact) anyerror!void {
+pub fn insertContact(db: *Database, contact: Contact) anyerror!void {
     const insertQuery = "INSERT INTO contacts (name, phone) VALUES (?, ?);";
     try db.connection.exec(insertQuery, .{ contact.name, contact.phone });
 }
 
-pub fn (db: *Database) getContacts() anyerror![]Contact {
+pub fn getContacts(db: *Database) anyerror![]Contact {
     const selectQuery = "SELECT name, phone FROM contacts;";
     const result = try db.connection.query(selectQuery);
 
@@ -29,13 +29,13 @@ pub fn (db: *Database) getContacts() anyerror![]Contact {
     while (result.next()) |row| {
         const name = try row.getText(0);
         const phone = try row.getText(1);
-        contacts = contacts ++ [Contact{ .name = name, .phone = phone }];
+        contacts = try std.mem.append(&contacts, &[1]Contact{Contact{ .name = name, .phone = phone }});
     }
 
     return contacts;
 }
 
-pub fn (db: *Database) deleteContact(name: []const u8) anyerror!void {
+pub fn deleteContact(db: *Database, name: []const u8) anyerror!void {
     const deleteQuery = "DELETE FROM contacts WHERE name = ?;";
-    try db.connection.exec(deleteQuery, .{ name });
+    try db.connection.exec(deleteQuery, .{name});
 }
